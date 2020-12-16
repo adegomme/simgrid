@@ -29,9 +29,9 @@ jobs:
       run: |
         Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
         scoop install gcc --global
-        echo "BOOST_ROOT=$BOOST_ROOT_1_72_0"               >> $GITHUB_ENV
-        echo "Boost_INCLUDE_DIR=$BOOST_ROOT_1_72_0\boost\include" >> $GITHUB_ENV
-        echo "Boost_LIBRARY_DIR=$BOOST_ROOT_1_72_0\lib"           >> $GITHUB_ENV
+        echo "BOOST_ROOT=${BOOST_ROOT_1_72_0}"               >> $GITHUB_ENV
+        echo "Boost_INCLUDE_DIR=${BOOST_ROOT_1_72_0}\boost\include" >> $GITHUB_ENV
+        echo "Boost_LIBRARY_DIR=${BOOST_ROOT_1_72_0}\lib"           >> $GITHUB_ENV
     - name: Build jar with Cmake
       run: |
           mkdir build
