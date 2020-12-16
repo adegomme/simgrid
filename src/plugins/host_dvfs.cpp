@@ -21,9 +21,13 @@
 
 SIMGRID_REGISTER_PLUGIN(host_dvfs, "Dvfs support", &sg_host_dvfs_plugin_init)
 
-static simgrid::config::Flag<double> cfg_sampling_rate("plugin/dvfs/sampling-rate", {"plugin/dvfs/sampling_rate"},
-    "How often should the dvfs plugin check whether the frequency needs to be changed?", 0.1,
-    [](double val){if (val != 0.1) sg_host_dvfs_plugin_init();});
+static simgrid::config::Flag<double>
+    cfg_sampling_rate("plugin/dvfs/sampling-rate",
+                      "How often should the dvfs plugin check whether the frequency needs to be changed?", 0.1,
+                      [](double val) {
+                        if (val != 0.1)
+                          sg_host_dvfs_plugin_init();
+                      });
 
 static simgrid::config::Flag<std::string> cfg_governor("plugin/dvfs/governor",
                                                        "Which Governor should be used that adapts the CPU frequency?",
@@ -43,12 +47,12 @@ static simgrid::config::Flag<std::string> cfg_governor("plugin/dvfs/governor",
                                                        });
 
 static simgrid::config::Flag<int>
-    cfg_min_pstate("plugin/dvfs/min-pstate", {"plugin/dvfs/min_pstate"},
+    cfg_min_pstate("plugin/dvfs/min-pstate",
                    "Which pstate is the minimum (and hence fastest) pstate for this governor?", 0);
 
 static const int max_pstate_not_limited = -1;
 static simgrid::config::Flag<int>
-    cfg_max_pstate("plugin/dvfs/max-pstate", {"plugin/dvfs/max_pstate"},
+    cfg_max_pstate("plugin/dvfs/max-pstate",
                    "Which pstate is the maximum (and hence slowest) pstate for this governor?", max_pstate_not_limited);
 
 /** @addtogroup SURF_plugin_load
@@ -140,7 +144,7 @@ public:
  */
 class Performance : public Governor {
 public:
-  explicit Performance(simgrid::s4u::Host* ptr) : Governor(ptr) {}
+  using Governor::Governor;
   std::string get_name() const override { return "Performance"; }
 
   void update() override { get_host()->set_pstate(get_min_pstate()); }
@@ -158,7 +162,7 @@ public:
  */
 class Powersave : public Governor {
 public:
-  explicit Powersave(simgrid::s4u::Host* ptr) : Governor(ptr) {}
+  using Governor::Governor;
   std::string get_name() const override { return "Powersave"; }
 
   void update() override { get_host()->set_pstate(get_max_pstate()); }
@@ -181,7 +185,7 @@ class OnDemand : public Governor {
   double freq_up_threshold_ = 0.80;
 
 public:
-  explicit OnDemand(simgrid::s4u::Host* ptr) : Governor(ptr) {}
+  using Governor::Governor;
   std::string get_name() const override { return "OnDemand"; }
 
   void update() override
@@ -229,7 +233,7 @@ class Conservative : public Governor {
   double freq_down_threshold_ = .2;
 
 public:
-  explicit Conservative(simgrid::s4u::Host* ptr) : Governor(ptr) {}
+  using Governor::Governor;
   std::string get_name() const override { return "Conservative"; }
 
   void update() override

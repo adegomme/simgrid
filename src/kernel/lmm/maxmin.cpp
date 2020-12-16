@@ -16,15 +16,10 @@ namespace simgrid {
 namespace kernel {
 namespace lmm {
 
-typedef std::vector<int> dyn_light_t;
+using dyn_light_t = std::vector<int>;
 
 int Variable::next_rank_   = 1;
 int Constraint::next_rank_ = 1;
-
-System* make_new_maxmin_system(bool selective_update)
-{
-  return new System(selective_update);
-}
 
 int Element::get_concurrency() const
 {
@@ -141,7 +136,7 @@ System::System(bool selective_update) : selective_update_active(selective_update
   XBT_DEBUG("Setting selective_update_active flag to %d", selective_update_active);
 
   if (selective_update)
-    modified_set_ = new kernel::resource::Action::ModifiedSet();
+    modified_set_ = std::make_unique<kernel::resource::Action::ModifiedSet>();
 }
 
 System::~System()
@@ -159,7 +154,6 @@ System::~System()
     cnst_free(cnst);
 
   xbt_mallocator_free(variable_mallocator_);
-  delete modified_set_;
 }
 
 void System::cnst_free(Constraint* cnst)

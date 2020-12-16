@@ -13,7 +13,7 @@ XBT_LOG_NEW_DEFAULT_SUBCATEGORY(instr_paje_events, instr, "Paje tracing event sy
 namespace simgrid {
 namespace instr {
 
-PajeEvent::PajeEvent(Container* container, Type* type, double timestamp, e_event_type eventType)
+PajeEvent::PajeEvent(Container* container, Type* type, double timestamp, PajeEventType eventType)
     : container_(container), type_(type), timestamp_(timestamp), eventType_(eventType)
 {
   on_creation(*this);
@@ -25,11 +25,11 @@ PajeEvent::~PajeEvent()
   on_destruction(*this);
 }
 
-StateEvent::StateEvent(Container* container, Type* type, e_event_type event_type, EntityValue* value, TIData* extra)
+StateEvent::StateEvent(Container* container, Type* type, PajeEventType event_type, EntityValue* value, TIData* extra)
     : PajeEvent::PajeEvent(container, type, SIMIX_get_clock(), event_type), value(value), extra_(extra)
 {
 #if HAVE_SMPI
-  if (simgrid::config::get_value<bool>("smpi/trace-call-location")) {
+  if (smpi_cfg_trace_call_location()) {
     const smpi_trace_call_location_t* loc = smpi_trace_get_call_location();
     filename                        = loc->filename;
     linenumber                      = loc->linenumber;
@@ -53,14 +53,14 @@ void LinkEvent::print()
 void StateEvent::print()
 {
   if (trace_format == TraceFormat::Paje) {
-    if (value != nullptr) // PAJE_PopState Event does not need to have a value
+    if (value != nullptr) // PajeEventType::PopState Event does not need to have a value
       stream_ << " " << value->get_id();
 
     if (TRACE_display_sizes())
       stream_ << " " << ((extra_ != nullptr) ? extra_->display_size() : "");
 
 #if HAVE_SMPI
-    if (simgrid::config::get_value<bool>("smpi/trace-call-location"))
+    if (smpi_cfg_trace_call_location())
       stream_ << " \"" << filename << "\" " << linenumber;
 #endif
   } else if (trace_format == TraceFormat::Ti) {
@@ -75,7 +75,7 @@ void StateEvent::print()
       container_name=std::to_string(stoi(container_name.erase(0, 5)) - 1);
     }
 #if HAVE_SMPI
-    if (config::get_value<bool>("smpi/trace-call-location"))
+    if (smpi_cfg_trace_call_location())
       stream_ << container_name << " location " << filename << " " << linenumber << std::endl ;
 #endif
     stream_ << container_name << " " << extra_->print();

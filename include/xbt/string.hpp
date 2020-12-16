@@ -72,11 +72,11 @@ class XBT_PUBLIC string {
 
 public:
   // Types
-  typedef std::size_t size_type;
-  typedef char& reference;
-  typedef const char& const_reference;
-  typedef char* iterator;
-  typedef const char* const_iterator;
+  using size_type       = std::size_t;
+  using reference       = char&;
+  using const_reference = const char&;
+  using iterator        = char*;
+  using const_iterator  = const char*;
 
   // Dtor
   ~string()
@@ -101,7 +101,7 @@ public:
   string() : string(&NUL, 0) {}
   explicit string(const char* s) : string(s, strlen(s)) {}
   string(string const& s) : string(s.c_str(), s.size()) {}
-  string(string&& s) noexcept : str(std::move(s.str))
+  string(string&& s) noexcept : str(s.str)
   {
     s.str.len  = 0;
     s.str.data = &NUL;

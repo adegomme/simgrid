@@ -51,7 +51,7 @@ void DragonflyZone::parse_specific_arguments(ClusterCreationArgs* cluster)
   std::vector<std::string> tmp;
   boost::split(parameters, cluster->topo_parameters, boost::is_any_of(";"));
 
-  if (parameters.size() != 4 || parameters.empty()) {
+  if (parameters.size() != 4) {
     surf_parse_error(
         "Dragonfly are defined by the number of groups, chassis per groups, blades per chassis, nodes per blade");
   }
@@ -152,7 +152,7 @@ void DragonflyZone::generate_link(const std::string& id, int numlinks, resource:
   linkTemplate.bandwidths.push_back(this->bw_ * numlinks);
   linkTemplate.latency   = this->lat_;
   linkTemplate.policy    = this->sharing_policy_;
-  linkTemplate.id        = std::move(id);
+  linkTemplate.id        = id;
   sg_platf_new_link(&linkTemplate);
   XBT_DEBUG("Generating link %s", linkTemplate.id.c_str());
   resource::LinkImpl* link;

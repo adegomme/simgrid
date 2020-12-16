@@ -99,7 +99,7 @@ simgrid::config::Flag<std::string> _smpi_cfg_comp_adjustment_file{"smpi/comp-adj
         std::ifstream fstream(filename);
         xbt_assert(fstream.is_open(), "Could not open file %s. Does it exist?", filename.c_str());
         std::string line;
-        typedef boost::tokenizer<boost::escaped_list_separator<char>> Tokenizer;
+        using Tokenizer = boost::tokenizer<boost::escaped_list_separator<char>>;
         std::getline(fstream, line); // Skip the header line
         while (std::getline(fstream, line)) {
           Tokenizer tok(line);
@@ -183,6 +183,7 @@ void smpi_init_options(){
     return;
   simgrid::config::declare_flag<bool>("smpi/display-timing", "Whether we should display the timing after simulation.", false);
   simgrid::config::declare_flag<bool>("smpi/keep-temps", "Whether we should keep the generated temporary files.", false);
+  simgrid::config::declare_flag<std::string>("smpi/tmpdir", "tmp dir for dlopen files", "/tmp");
 
   simgrid::config::declare_flag<std::string>("smpi/coll-selector", "Which collective selector to use", "default");
   simgrid::config::declare_flag<std::string>("smpi/gather", "Which collective to use for gather", "");
@@ -243,16 +244,6 @@ void smpi_init_options(){
       "smpi/ois", "Small messages timings (MPI_Isend minimum time for small messages)", "0:0:0:0:0");
   simgrid::config::declare_flag<std::string>(
       "smpi/or", "Small messages timings (MPI_Recv minimum time for small messages)", "0:0:0:0:0");
-  simgrid::config::alias("smpi/display-timing", {"smpi/display_timing"});
-  simgrid::config::alias("smpi/coll-selector", {"smpi/coll_selector"});
-  simgrid::config::alias("smpi/simulate-computation", {"smpi/simulate_computation"});
-  simgrid::config::alias("smpi/shared-malloc", {"smpi/use_shared_malloc", "smpi/use-shared-malloc"});
-  simgrid::config::alias("smpi/host-speed", {"smpi/running_power", "smpi/running-power"});
-  simgrid::config::alias("smpi/cpu-threshold", {"smpi/cpu_threshold"});
-  simgrid::config::alias("smpi/async-small-thresh", {"smpi/async_small_thres", "smpi/async_small_thresh"});
-  simgrid::config::alias("smpi/send-is-detached-thresh", {"smpi/send_is_detached_thres", "smpi/send_is_detached_thresh"});
-  simgrid::config::alias("smpi/privatization", {"smpi/privatize_global_variables", "smpi/privatize-global-variables"});
-  simgrid::config::alias("smpi/reduce_scatter", {"smpi/reduce-scatter"});
   _smpi_options_initialized=true;
 }
 

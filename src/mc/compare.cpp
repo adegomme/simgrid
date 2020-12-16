@@ -10,6 +10,8 @@
 #include "src/mc/mc_smx.hpp"
 #include "src/mc/sosp/Snapshot.hpp"
 
+#include <algorithm>
+
 XBT_LOG_NEW_DEFAULT_SUBCATEGORY(mc_compare, xbt, "Logging specific to mc_compare in mc");
 
 using simgrid::mc::remote;
@@ -38,8 +40,8 @@ public:
   }
 };
 
-typedef std::array<HeapLocation, 2> HeapLocationPair;
-typedef std::set<HeapLocationPair> HeapLocationPairs;
+using HeapLocationPair  = std::array<HeapLocation, 2>;
+using HeapLocationPairs = std::set<HeapLocationPair>;
 
 class HeapArea : public HeapLocation {
 public:
@@ -134,21 +136,9 @@ public:
 static ssize_t heap_comparison_ignore_size(const std::vector<simgrid::mc::IgnoredHeapRegion>* ignore_list,
                                            const void* address)
 {
-  int start = 0;
-  int end = ignore_list->size() - 1;
-
-  while (start <= end) {
-    unsigned int cursor = (start + end) / 2;
-    simgrid::mc::IgnoredHeapRegion const& region = (*ignore_list)[cursor];
-    if (region.address == address)
-      return region.size;
-    if (region.address < address)
-      start = cursor + 1;
-    if (region.address > address)
-      end = cursor - 1;
-  }
-
-  return -1;
+  auto pos = std::lower_bound(ignore_list->begin(), ignore_list->end(), address,
+                              [](auto const& reg, auto const* addr) { return reg.address < addr; });
+  return (pos != ignore_list->end() && pos->address == address) ? pos->size : -1;
 }
 
 static bool is_stack(const void *address)
@@ -748,7 +738,6 @@ static bool heap_area_differ(StateComparator& state, const void* area1, const vo
   int new_size2 = -1;
 
   Type* new_type1 = nullptr;
-  Type* new_type2 = nullptr;
 
   bool match_pairs = false;
 
@@ -925,10 +914,12 @@ static bool heap_area_differ(StateComparator& state, const void* area1, const vo
 
     // The type of the variable is already known:
     if (type) {
-      new_type1 = new_type2 = type;
+      new_type1 = type;
     }
     // Type inference from the block type.
     else if (state.types_<1>(block1, frag1) != nullptr || state.types_<2>(block2, frag2) != nullptr) {
+      Type* new_type2 = nullptr;
+
       offset1 = (const char*)area1 - (const char*)real_addr_frag1;
       offset2 = (const char*)area2 - (const char*)real_addr_frag2;
 

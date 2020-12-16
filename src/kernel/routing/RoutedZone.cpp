@@ -68,9 +68,9 @@ void RoutedZone::get_graph(const s_xbt_graph_t* graph, std::map<std::string, xbt
       if (my_src == my_dst)
         continue;
 
-      auto* route = new RouteCreationArgs();
+      RouteCreationArgs route;
 
-      get_local_route(my_src, my_dst, route, nullptr);
+      get_local_route(my_src, my_dst, &route, nullptr);
 
       XBT_DEBUG("get_route_and_latency %s -> %s", my_src->get_cname(), my_dst->get_cname());
 
@@ -79,15 +79,15 @@ void RoutedZone::get_graph(const s_xbt_graph_t* graph, std::map<std::string, xbt
       const char *previous_name;
       const char *current_name;
 
-      if (route->gw_src) {
-        previous      = new_xbt_graph_node(graph, route->gw_src->get_cname(), nodes);
-        previous_name = route->gw_src->get_cname();
+      if (route.gw_src) {
+        previous      = new_xbt_graph_node(graph, route.gw_src->get_cname(), nodes);
+        previous_name = route.gw_src->get_cname();
       } else {
         previous      = new_xbt_graph_node(graph, my_src->get_cname(), nodes);
         previous_name = my_src->get_cname();
       }
 
-      for (auto const& link : route->link_list) {
+      for (auto const& link : route.link_list) {
         const char* link_name = link->get_cname();
         current               = new_xbt_graph_node(graph, link_name, nodes);
         current_name          = link_name;
@@ -97,17 +97,15 @@ void RoutedZone::get_graph(const s_xbt_graph_t* graph, std::map<std::string, xbt
         previous_name = current_name;
       }
 
-      if (route->gw_dst) {
-        current      = new_xbt_graph_node(graph, route->gw_dst->get_cname(), nodes);
-        current_name = route->gw_dst->get_cname();
+      if (route.gw_dst) {
+        current      = new_xbt_graph_node(graph, route.gw_dst->get_cname(), nodes);
+        current_name = route.gw_dst->get_cname();
       } else {
         current      = new_xbt_graph_node(graph, my_dst->get_cname(), nodes);
         current_name = my_dst->get_cname();
       }
       new_xbt_graph_edge(graph, previous, current, edges);
       XBT_DEBUG("  %s -> %s", previous_name, current_name);
-
-      delete route;
     }
   }
 }
@@ -174,6 +172,7 @@ void RoutedZone::add_route_check_params(NetPoint* src, NetPoint* dst, NetPoint* 
     xbt_assert(not dst->is_netzone(),
                "When defining a route, dst cannot be a netzone such as '%s'. Did you meant to have a NetzoneRoute?",
                dstName);
+    s4u::NetZone::on_route_creation(symmetrical, src, dst, gw_src, gw_dst, link_list);
   } else {
     XBT_DEBUG("Load NetzoneRoute from %s@%s to %s@%s", srcName, gw_src->get_cname(), dstName, gw_dst->get_cname());
     xbt_assert(src->is_netzone(), "When defining a NetzoneRoute, src must be a netzone but '%s' is not", srcName);
@@ -192,9 +191,8 @@ void RoutedZone::add_route_check_params(NetPoint* src, NetPoint* dst, NetPoint* 
                gw_dst->get_cname(), dstName);
     xbt_assert(not link_list.empty(), "Empty route (between %s@%s and %s@%s) forbidden.", srcName, gw_src->get_cname(),
                dstName, gw_dst->get_cname());
+    s4u::NetZone::on_route_creation(symmetrical,  gw_src, gw_dst, gw_src, gw_dst, link_list);
   }
-
-  s4u::NetZone::on_route_creation(symmetrical, src, dst, gw_src, gw_dst, link_list);
 }
 } // namespace routing
 } // namespace kernel

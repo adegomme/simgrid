@@ -6,6 +6,7 @@
 #ifndef SIMGRID_PLUGINS_FILE_SYSTEM_H_
 #define SIMGRID_PLUGINS_FILE_SYSTEM_H_
 
+#include <simgrid/config.h>
 #include <simgrid/forward.h>
 #include <xbt/base.h>
 #include <xbt/dict.h>
@@ -20,7 +21,6 @@
 
 // C interface
 ////////////////
-typedef sg_file_t msg_file_t; // MSG backwards compatibility
 
 SG_BEGIN_DECL
 XBT_PUBLIC void sg_storage_file_system_init();
@@ -53,6 +53,10 @@ XBT_PUBLIC xbt_dict_t sg_storage_get_content(const_sg_storage_t storage);
 
 XBT_PUBLIC xbt_dict_t sg_host_get_storage_content(sg_host_t host);
 
+#if SIMGRID_HAVE_MSG
+
+typedef sg_file_t msg_file_t; // MSG backwards compatibility
+
 #define MSG_file_open(fullpath, data) sg_file_open((fullpath), (data))
 #define MSG_file_read(fd, size) sg_file_read((fd), (size))
 #define MSG_file_write(fd, size) sg_file_write((fd), (size))
@@ -77,6 +81,8 @@ XBT_PUBLIC xbt_dict_t sg_host_get_storage_content(sg_host_t host);
 
 #define MSG_host_get_storage_content(st) sg_host_get_storage_content(st)
 
+#endif // SIMGRID_HAVE_MSG
+
 SG_END_DECL
 
 // C++ interface
@@ -100,7 +106,7 @@ namespace s4u {
  * For now, you cannot change the mountpoints programmatically, and must declare them from your platform file.
  */
 class XBT_PUBLIC File : public xbt::Extendable<File> {
-  sg_size_t size_;
+  sg_size_t size_ = 0;
   std::string path_;
   std::string fullpath_;
   sg_size_t current_position_ = SEEK_SET;

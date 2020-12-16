@@ -1,17 +1,18 @@
 ----------------------------------------------------------------------------
 
-SimGrid (3.25.1) UNRELEASED (target: March 20 2020 or v3.26 on 3/26/20)
+SimGrid (3.26) December 15. 2020
+
+The Release release (the French lockdown was eased today).
 
 Important user-visible changes:
  - SimGrid now requires a compiler with C++14 support.
    Sibling projects should upgrade their FindSimgrid.cmake
  - Surf precision default value is now 1e-9, instead of 1e-5. This was changed as
-   several users had difficult to understand issues when using high bandwidth or
+   several users had difficulties to understand issues when using high bandwidth or
    small latency events. The new value was already the default for SMPI and
    should not cause too much performance hit. It can change some simulation
    timings if simulation was skipping a lot of small events (which was actually
-   an issue of said simulation). The value can still be changed back using
-   --cfg=surf/precision:1e-5.
+   an issue per see). The old value can be restored with --cfg=surf/precision:1e-5.
  - On some network models (L07, CM02, LV08), an implicit loopback link is created
    for local communication. Default bandwidth was 500MBps and latency was 15µs,
    which was rather bad. Default values have been changed to 10GBps and 0 latency.
@@ -33,7 +34,10 @@ General:
  - LTO behavior on GCC can be parameterized using LTO_EXTRA_FLAG in cmake.
    Setting it to "auto" will use all available cores, while setting it to n will
    use n cores to speedup link step (usage: cmake -DLTO_EXTRA_FLAG=4).
- - Remove obsolete option --cfg=contexts/parallel-threshold.
+ - Remove obsolete runtime option 'contexts/parallel-threshold'.
+ - Runtime option 'tracing/msg/process' renamed to 'tracing/actor'. The old name
+   has been kept for compatibility.
+ - Finally remove obsolete snake_case() aliases for runtime options.
  - Further improve the documentation.
 
 S4U:
@@ -50,6 +54,16 @@ SMPI:
  - smpicc/cxx/ff/f90 now will actually perform definition checks at link time. When
    building shared libraries, this may cause issues, so environment variable
    SMPI_NO_UNDEFINED_CHECK can be added to disable this.
+ - most temporary files should now be created in /tmp dir (or equivalent). 
+   If this one does not allow execution of code (noexec flag), this may cause issues.
+   Please use another tmp directory (using TMPDIR or equivalent system variable) 
+   in this case.
+
+Model-Checker:
+ - A large refactoring is ongoing, but this should be transparent for users so far.
+
+XBT:
+ - Drop xbt_str_split().
 
 C binding and interface:
  - The return type of the sg_actor_on_exit() callbacks is now 'void'
@@ -67,6 +81,7 @@ Fixed bugs (FG#.. -> FramaGit bugs; FG!.. -> FG merge requests)
  - FG#48: The Impossible Did Happen (yet again)
  - FG#50: Suspending an actor executed at the current timestamp fails
  - FG#52: Zero-seconds timeout : "That's in the past already"
+ - FG#53: Crash while using ns-3 network model
  - FG#54: How to suspend a comm?
  - FG!22: Stochastic Profiles
  - FG!24: Documentation and fix for xbt/random
@@ -80,6 +95,7 @@ Fixed bugs (FG#.. -> FramaGit bugs; FG!.. -> FG merge requests)
  - GH#336: Packet-level simulation using SMPI?
  - GH#345: Error in the LMM while migrating a VM
  - GH#346: [SMPI] error while loading shared libraries: libsimgrid.so
+ - GH#352: pip install / python setup.py install fail to find pybind11
  - GH!337: Fix link_energy plugin for wifi platforms
  - GH!339: Add Mailbox set_receiver method to python binding
  - GH!344: Cast hugepages macros parameters to int64
