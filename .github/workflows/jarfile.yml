@@ -34,6 +34,7 @@ jobs:
         echo "Boost_LIBRARY_DIR=${BOOST_ROOT}\lib"           >> $GITHUB_ENV
     - name: Build jar with Cmake
       run: |
+          cat $GITHUB_ENV
           mkdir build
           cd build
           cmake -Denable_documentation=OFF -Denable_java=ON -Denable_msg=ON -Denable_lib_in_jar=ON -Dminimal-bindings=ON -Denable_compile_optimizations=ON -Denable_smpi=OFF ${{ matrix.config.cmake_extra_options }} -G "${{ matrix.config.generator }}" ..
