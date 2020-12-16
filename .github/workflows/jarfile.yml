@@ -14,10 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
      # install dependencies
-    - name: Init options
-      run: |
-          echo "CC=${{ matrix.config.cc }}"   >> $GITHUB_ENV
-          echo "CXX=${{ matrix.config.cxx }}" >> GITHUB_ENV
     - name: Install boost on ubuntu
       if: matrix.config.os == 'ubuntu'
       run: sudo apt-get update && sudo apt-get install -yq libboost-dev
@@ -29,14 +25,11 @@ jobs:
       run: |
         Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
         scoop install gcc --global
-        echo "BOOST_ROOT=${BOOST_ROOT_1_72_0}"               >> $GITHUB_ENV
-        echo "Boost_INCLUDE_DIR=${BOOST_ROOT}\boost\include" >> $GITHUB_ENV
-        echo "Boost_LIBRARY_DIR=${BOOST_ROOT}\lib"           >> $GITHUB_ENV
     - name: Build jar with Cmake
       run: |
           mkdir build
           cd build
-          cmake -Denable_documentation=OFF -Denable_java=ON -Denable_msg=ON -Denable_lib_in_jar=ON -Dminimal-bindings=ON -Denable_compile_optimizations=ON -Denable_smpi=OFF ${{ matrix.config.cmake_extra_options }} -G "${{ matrix.config.generator }}" ..
+          BOOST_ROOT=${env:BOOST_ROOT_1_72_0} Boost_INCLUDE_DIR=${env:BOOST_ROOT_1_72_0}\boost\include Boost_LIBRARY_DIR=${env:BOOST_ROOT_1_72_0}\lib CXX=${{ matrix.config.cxx }} CC=${{ matrix.config.cc }} cmake -Denable_documentation=OFF -Denable_java=ON -Denable_msg=ON -Denable_lib_in_jar=ON -Dminimal-bindings=ON -Denable_compile_optimizations=ON -Denable_smpi=OFF ${{ matrix.config.cmake_extra_options }} -G "${{ matrix.config.generator }}" ..
           make -j2 simgrid-java_jar
     - name: Upload jar
       uses: actions/upload-artifact@v2
